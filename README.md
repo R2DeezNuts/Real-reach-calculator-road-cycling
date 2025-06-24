@@ -1,1 +1,1 @@
-![Diagrama de flujo](imagen_ejemplo/diagram.png)
+![Diagrama de flujo](imagen_ejemplo/Figure_1.png)
