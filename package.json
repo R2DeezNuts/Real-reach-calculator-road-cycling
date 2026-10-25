@@ -1,0 +1,14 @@
+{
+  "name": "real-reach",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Comparador visual de geometría de potencia y manillar para ciclismo de carretera.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "start": "python -m http.server 8000 --bind 127.0.0.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

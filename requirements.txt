@@ -1,0 +1,2 @@
+# Solo para el gráfico de escritorio; la aplicación web no necesita Python.
+matplotlib>=3.8,<4

@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Potencia y reach horizontales, sin altura de montaje",
+    "headAngle": 72,
+    "config": {
+      "length": 100,
+      "angle": -18,
+      "height": 0,
+      "reach": 70,
+      "rotation": 0
+    },
+    "expected": { "x": 170, "y": 0 }
+  },
+  {
+    "name": "Altura de montaje medida por la dirección, no verticalmente",
+    "headAngle": 60,
+    "config": {
+      "length": 100,
+      "angle": -30,
+      "height": 20,
+      "reach": 80,
+      "rotation": 0
+    },
+    "expected": { "x": 170, "y": 17.32050807568877 }
+  },
+  {
+    "name": "Potencia elevada 30 grados con dirección de 60 grados",
+    "headAngle": 60,
+    "config": {
+      "length": 100,
+      "angle": 0,
+      "height": 0,
+      "reach": 80,
+      "rotation": 0
+    },
+    "expected": { "x": 166.60254037844388, "y": 50 }
+  },
+  {
+    "name": "Vector de reach inclinado hacia abajo",
+    "headAngle": 60,
+    "config": {
+      "length": 100,
+      "angle": -30,
+      "height": 0,
+      "reach": 80,
+      "rotation": -20
+    },
+    "expected": { "x": 175.17540966287268, "y": -27.361611466053496 }
+  }
+]

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Compara la geometría de potencia y manillar de tu bicicleta de carretera. Visualiza diferencias de alcance y altura, ajusta montajes y comparte resultados."
+    />
+    <meta name="theme-color" content="#f6f5f0" />
+    <title>Real Reach — Cada milímetro cuenta.</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./src/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#calculator">Ir a la calculadora</a>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Real Reach, inicio"
+        ><img src="./favicon.svg" width="34" height="34" alt="" /><span
+          >real<span class="brand-light">reach</span
+          ><span class="brand-dot">.</span></span
+        ></a
+      >
+      <span class="header-caption">ROAD CYCLING / GEOMETRY LAB</span>
+      <button class="text-button" id="open-method">
+        Cómo se calcula <span aria-hidden="true">↗</span>
+      </button>
+    </header>
+    <main id="calculator">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">
+            <span class="tiny-line"></span> MENOS INTUICIÓN. MÁS GEOMETRÍA.
+          </p>
+          <h1 id="page-title">Cada milímetro cuenta<span>.</span></h1>
+          <p class="intro-copy">
+            Encuentra la diferencia entre tu montaje y tu próxima idea.
+          </p>
+        </div>
+        <div class="intro-tools">
+          <span id="save-state" class="save-state"
+            >Guardado en este navegador</span
+          ><button id="share" class="button button-dark">
+            <span aria-hidden="true">↗</span> Compartir montaje
+          </button>
+        </div>
+      </section>
+
+      <div class="workspace">
+        <aside class="settings" aria-label="Configuración de la bicicleta">
+          <div class="section-heading">
+            <h2><span class="section-number">01</span> Tu bicicleta</h2>
+            <span class="mini-label">COMÚN</span>
+          </div>
+          <div class="head-control">
+            <label for="head-angle">Ángulo de dirección</label>
+            <div class="number-shell">
+              <input
+                id="head-angle"
+                type="number"
+                min="60"
+                max="85"
+                step="0.1"
+                value="72.5"
+                inputmode="decimal"
+                aria-describedby="head-error"
+              /><span>°</span>
+            </div>
+          </div>
+          <p class="field-error" id="head-error" aria-live="polite"></p>
+          <p class="hint">
+            Respecto al suelo. Consulta la geometría de tu cuadro.
+          </p>
+          <div class="section-heading setup-heading">
+            <h2><span class="section-number">02</span> Tu montaje</h2>
+            <span id="setup-count" class="mini-label">3 / 4</span>
+          </div>
+          <div
+            class="setup-picker"
+            id="setup-picker"
+            role="group"
+            aria-label="Seleccionar montaje para editar"
+          ></div>
+          <div class="name-row">
+            <label class="sr-only" for="setup-name">Nombre del montaje</label
+            ><input
+              id="setup-name"
+              maxlength="40"
+              required
+              autocomplete="off"
+              aria-describedby="name-error"
+            /><button
+              class="icon-button"
+              id="delete-setup"
+              aria-label="Eliminar montaje seleccionado"
+              title="Eliminar montaje"
+            >
+              ×
+            </button>
+          </div>
+          <p id="name-error" class="field-error" aria-live="polite"></p>
+          <div class="reference-control">
+            <input type="checkbox" id="is-reference" /><label for="is-reference"
+              >Usar como referencia</label
+            >
+          </div>
+          <div id="controls" class="controls"></div>
+          <p class="mount-note">
+            Altura de montaje = distancia por el eje de dirección hasta el
+            centro de la abrazadera de la potencia.
+            <button id="height-help" class="inline-button">
+              Ver detalle ↗
+            </button>
+          </p>
+          <button id="add-setup" class="button button-add">
+            <span aria-hidden="true">＋</span> Duplicar montaje
+          </button>
+          <button id="reset" class="reset-button">Restablecer ejemplo</button>
+        </aside>
+
+        <section class="results" aria-label="Comparación de montajes">
+          <div class="plot-panel">
+            <div class="plot-heading">
+              <div>
+                <p class="eyebrow plot-eyebrow">
+                  VISTA LATERAL · ESCALA 1:1 ENTRE EJES
+                </p>
+                <h2>La posición, en perspectiva.</h2>
+              </div>
+              <button
+                id="export-svg"
+                class="plot-button"
+                title="Descargar el diagrama en SVG"
+              >
+                SVG <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+            <div class="plot-legend" id="plot-legend"></div>
+            <svg
+              id="geometry"
+              viewBox="0 0 860 385"
+              role="img"
+              aria-labelledby="chart-title chart-description"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <title id="chart-title">Geometría de los montajes</title>
+              <desc id="chart-description">
+                Comparación lateral de dirección, potencia y vector de reach del
+                manillar. Las coordenadas exactas están en la tabla de
+                resultados.
+              </desc>
+            </svg>
+            <div class="plot-footer">
+              <span
+                ><i class="solid-sample"></i> Potencia
+                <i class="dash-sample"></i> Vector de reach</span
+              ><span>Origen: punto común de dirección · mm</span>
+            </div>
+          </div>
+          <div class="comparison-header">
+            <h2 id="comparison-title">Frente a tu referencia</h2>
+            <span id="comparison-reference"></span>
+          </div>
+          <div
+            class="metrics"
+            aria-live="polite"
+            aria-atomic="true"
+            id="metrics"
+          ></div>
+          <p class="interpretation" id="interpretation"></p>
+          <section class="table-section" aria-labelledby="table-title">
+            <div class="table-header">
+              <h2 id="table-title">Todos tus montajes</h2>
+              <button id="export-csv" class="text-button">
+                Exportar CSV <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+            <div
+              class="table-scroll"
+              tabindex="0"
+              role="region"
+              aria-label="Resultados de todos los montajes"
+            >
+              <table>
+                <caption class="sr-only">
+                  Coordenadas respecto al origen y diferencias frente al montaje
+                  de referencia, en milímetros.
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Montaje</th>
+                    <th scope="col">Alcance X</th>
+                    <th scope="col">Altura Y</th>
+                    <th scope="col">Δ alcance</th>
+                    <th scope="col">Δ altura</th>
+                  </tr>
+                </thead>
+                <tbody id="result-rows"></tbody>
+              </table>
+            </div>
+            <p class="table-note">
+              + hacia delante / arriba &nbsp; · &nbsp; − hacia atrás / abajo
+              &nbsp; · &nbsp; Todas las medidas en mm
+            </p>
+          </section>
+        </section>
+      </div>
+      <section class="method-strip">
+        <span class="method-icon" aria-hidden="true">↗</span>
+        <div>
+          <h2>Geometría clara. Decisiones con contexto.</h2>
+          <p>
+            Compara puntos del manillar en un modelo 2D. La posición de las
+            manetas y de tus manos requiere medidas adicionales.
+          </p>
+        </div>
+        <button id="read-model" class="text-button">
+          Entender el modelo <span aria-hidden="true">↗</span>
+        </button>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <span
+        >REAL REACH <span class="footer-divider">/</span> Hecho para
+        afinar.</span
+      ><a
+        href="https://github.com/R2DeezNuts/Real-reach-calculator-road-cycling"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Código y documentación ↗</a
+      ><span>Sin cuentas. Sin telemetría.</span>
+    </footer>
+    <p id="toast" class="toast" role="status" hidden></p>
+    <dialog id="method-dialog" aria-labelledby="method-title">
+      <div class="dialog-heading">
+        <p class="eyebrow">EL MODELO / REAL REACH</p>
+        <button
+          id="close-method"
+          class="icon-button"
+          aria-label="Cerrar explicación"
+        >
+          ×
+        </button>
+      </div>
+      <h2 id="method-title">Tres vectores. Un punto.</h2>
+      <p>
+        El origen es un punto fijo del eje de dirección, común a todos los
+        montajes. X crece hacia delante e Y hacia arriba.
+      </p>
+      <ol>
+        <li>
+          <strong>Montaje:</strong> sube por el eje de dirección una distancia h
+          hasta el centro de la abrazadera de la potencia. Si partes de la parte
+          superior del cuadro, incluye tapa de dirección, espaciadores y la
+          distancia hasta ese centro.
+        </li>
+        <li>
+          <strong>Potencia:</strong> longitud L entre centros. Su inclinación
+          respecto al suelo es 90° − α + β. α es la dirección y β el ángulo
+          nominal de potencia; −6° baja respecto a una potencia de 0°.
+        </li>
+        <li>
+          <strong>Manillar:</strong> un vector de longitud R y ángulo γ respecto
+          a la horizontal. Con γ = 0°, representa el reach nominal proyectado
+          hacia delante.
+        </li>
+      </ol>
+      <div class="formula">
+        X = −h cos α + L cos(90° − α + β) + R cos γ<br />Y = h sin α + L sin(90°
+        − α + β) + R sin γ
+      </div>
+      <h3>Qué significa el resultado</h3>
+      <p>
+        ΔX y ΔY son las diferencias respecto al montaje marcado como referencia.
+        El desplazamiento es √(ΔX² + ΔY²). Se calcula sin redondear y se muestra
+        con una cifra decimal; no es una garantía de precisión física.
+      </p>
+      <h3>Qué queda fuera</h3>
+      <p>
+        El modelo no incluye stack/reach del cuadro, sillín, caída del manillar,
+        forma de las curvas, manetas o flexión. El ángulo del vector no simula
+        fielmente la rotación de cualquier manillar real. No permite comparar
+        cuadros distintos ni determinar un ajuste biomecánico óptimo.
+      </p>
+      <p class="hint">
+        Los rangos de entrada delimitan esta herramienta; no certifican
+        compatibilidad ni límites de montaje. Respeta las indicaciones del
+        fabricante.
+      </p>
+    </dialog>
+    <dialog id="share-dialog" aria-labelledby="share-title">
+      <div class="dialog-heading">
+        <h2 id="share-title">Enlace de tu comparación</h2>
+        <button id="close-share" class="icon-button" aria-label="Cerrar enlace">
+          ×
+        </button>
+      </div>
+      <p>No se ha podido copiar automáticamente. Puedes copiar este enlace:</p>
+      <label for="share-url">Enlace completo</label
+      ><textarea id="share-url" rows="5" readonly></textarea>
+    </dialog>
+    <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+      <h2 id="confirm-title">Confirmar cambio</h2>
+      <p id="confirm-message"></p>
+      <form method="dialog" class="confirm-actions">
+        <button class="button button-add" value="cancel" autofocus>
+          Cancelar</button
+        ><button class="button button-dark" value="confirm">Confirmar</button>
+      </form>
+    </dialog>
+    <noscript
+      ><p class="noscript">
+        Activa JavaScript para utilizar la calculadora. El código y las fórmulas
+        están disponibles en el README del proyecto.
+      </p></noscript
+    >
+  </body>
+</html>

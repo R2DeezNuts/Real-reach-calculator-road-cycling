@@ -1,0 +1,27 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  geometry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: JavaScript geometry, validation, sharing and CSV
+        run: node --test
+      - name: Python geometry and shared fixtures
+        run: python -m unittest discover -s tests -p 'test_*.py' -v

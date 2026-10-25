@@ -1,81 +1,81 @@
+"""Geometría 2D de potencia y manillar. Unidades: milímetros y grados."""
+
 import math
-import matplotlib.pyplot as plt
-#!/usr/bin/env python3
+
+
+def _finite(*values):
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) for value in values):
+        raise ValueError("Las medidas deben ser números finitos.")
+
+
 def calcula_endpoint(head_ang_deg, extension, stem_ang_deg, height):
+    """Centro del manillar. Height se mide por el eje, hasta el centro de potencia."""
+    _finite(head_ang_deg, extension, stem_ang_deg, height)
+    if not 0 < head_ang_deg < 90 or extension <= 0 or height < 0:
+        raise ValueError("Dirección entre 0 y 90°, longitud positiva y altura no negativa.")
     phi_h = math.radians(180.0 - head_ang_deg)
-    h_x = height * math.cos(phi_h)
-    h_y = height * math.sin(phi_h)
-
     phi_e = math.radians(90.0 - head_ang_deg + stem_ang_deg)
-    e_x = extension * math.cos(phi_e)
-    e_y = extension * math.sin(phi_e)
+    return (height * math.cos(phi_h) + extension * math.cos(phi_e),
+            height * math.sin(phi_h) + extension * math.sin(phi_e))
 
-    return h_x + e_x, h_y + e_y
+
+def calcula_punto(head_ang, config):
+    """Extremo del vector de reach; no incluye manetas ni posición de las manos."""
+    if len(config) != 5:
+        raise ValueError("Cada montaje necesita longitud, ángulo, altura, reach y ángulo del vector.")
+    extension, angle, height, reach, rotation = config
+    _finite(reach, rotation)
+    if reach <= 0:
+        raise ValueError("El reach debe ser positivo.")
+    x, y = calcula_endpoint(head_ang, extension, angle, height)
+    phi = math.radians(rotation)
+    return x + reach * math.cos(phi), y + reach * math.sin(phi)
+
 
 def calcula_deltas(configs, head_ang):
-    resultados = []
+    """Diferencias frente al primer montaje, con dirección y redondeo explícitos."""
+    if not configs:
+        raise ValueError("Añade al menos un montaje.")
     reference_name, reference_config = configs[0]
-    p_ref = calcula_endpoint(head_ang, *reference_config[:3])
-    phi_ref = math.radians(reference_config[4])
-    full_ref = (p_ref[0] + reference_config[3]*math.cos(phi_ref),
-                p_ref[1] + reference_config[3]*math.sin(phi_ref))
-
+    x_ref, y_ref = calcula_punto(head_ang, reference_config)
+    resultados = []
     for name, config in configs[1:]:
-        p_end = calcula_endpoint(head_ang, *config[:3])
-        phi_hb = math.radians(config[4])
-        full = (p_end[0] + config[3]*math.cos(phi_hb),
-                p_end[1] + config[3]*math.sin(phi_hb))
-
-        dx = full[0] - full_ref[0]
-        dy = full[1] - full_ref[1]
-        nivel = 'higher' if dy > 0 else 'lower'
-        texto = f"{name} has {dx:.1f} mm more reach and {abs(dy):.1f} mm {nivel} than {reference_name}"
-        resultados.append(texto)
-
+        x, y = calcula_punto(head_ang, config)
+        dx, dy = x - x_ref, y - y_ref
+        horizontal = "mismo alcance" if abs(dx) < 0.05 else f"{abs(dx):.1f} mm {'más adelante' if dx > 0 else 'más atrás'}"
+        vertical = "misma altura" if abs(dy) < 0.05 else f"{abs(dy):.1f} mm {'más alto' if dy > 0 else 'más bajo'}"
+        resultados.append(f"{name}: {horizontal}, {vertical} respecto a {reference_name}")
     return resultados
 
+
 def dibuja(head_ang, configs):
-    fig, ax = plt.subplots(figsize=(7,7))
-    ax.set_aspect('equal','box')
-    ax.grid(True, linestyle='--', alpha=0.3)
+    """Gráfico de escritorio opcional; Matplotlib solo es necesario aquí."""
+    deltas = calcula_deltas(configs, head_ang)
+    import matplotlib.pyplot as plt
 
-    max_ext = max(cfg[0] for _, cfg in configs)
-    max_h   = max(cfg[2] for _, cfg in configs)
-    max_hb  = max(cfg[3] for _, cfg in configs)
-    L = max_ext * 1.3 + max_h + max_hb
-
+    fig, ax = plt.subplots(figsize=(9, 7))
+    ax.set_aspect("equal", "box")
+    ax.grid(True, linestyle="--", alpha=0.2)
     theta = math.radians(180.0 - head_ang)
-    ax.plot([0, L * math.cos(theta)], [0, L * math.sin(theta)],
-            color='gold', linewidth=4, label='Steerer axis')
-
-    colors = ['green', 'red', 'blue', 'purple', 'orange', 'cyan']
-    for i, (name, config) in enumerate(configs):
-        color = colors[i % len(colors)]
-        ext, ang, h, hb_len, hb_ang = config
-
-        phi_h = math.radians(180.0 - head_ang)
-        hx, hy = h * math.cos(phi_h), h * math.sin(phi_h)
-
-        phi_e = math.radians(90.0 - head_ang + ang)
-        ex, ey = ext * math.cos(phi_e), ext * math.sin(phi_e)
-        x0, y0 = hx + ex, hy + ey
-
-        ax.plot([0, hx], [0, hy], color=color, linewidth=3)
-        ax.plot([hx, x0], [hy, y0], color=color, linewidth=2, label=f'{name}')
-
-        phi_hb = math.radians(hb_ang)
-        bx, by = hb_len * math.cos(phi_hb), hb_len * math.sin(phi_hb)
-        ax.plot([x0, x0 + bx], [y0, y0 + by],
-                color=color, linewidth=2, linestyle='--')
-
-    # Añadir los resultados como texto en la esquina inferior izquierda
-    deltas_text = '\n'.join(calcula_deltas(configs, head_ang))
-    ax.text(0.02, 0.5, deltas_text, transform=ax.transAxes,
-            fontsize=9, va='bottom', ha='left',
-            bbox=dict(boxstyle="round,pad=0.5", facecolor='white', alpha=0.8))
-
-    ax.legend(loc='upper left')
-    ax.set_xlabel('X (mm)')
-    ax.set_ylabel('Y (mm)')
-    ax.set_title('Comparación: stems con manillares distintos')
+    axis_length = max(100, max(config[2] for _, config in configs) + 30)
+    ax.plot([0, axis_length * math.cos(theta)], [0, axis_length * math.sin(theta)],
+            color="#879889", linewidth=4, alpha=0.6, label="Eje de dirección")
+    colors = ["#687563", "#bb4b24", "#2c8779", "#8a66b3"]
+    for index, (name, config) in enumerate(configs):
+        extension, angle, height, _, _ = config
+        mount = height * math.cos(theta), height * math.sin(theta)
+        clamp = calcula_endpoint(head_ang, extension, angle, height)
+        end = calcula_punto(head_ang, config)
+        color = colors[index % len(colors)]
+        ax.plot([0, mount[0], clamp[0]], [0, mount[1], clamp[1]],
+                color=color, linewidth=2, marker="o", markersize=3, label=name)
+        ax.plot([clamp[0], end[0]], [clamp[1], end[1]], color=color, linestyle="--")
+        ax.plot(end[0], end[1], "o", color=color, markersize=5)
+    ax.legend(loc="best")
+    ax.set_xlabel("Alcance X (mm)")
+    ax.set_ylabel("Altura Y (mm)")
+    ax.set_title("Real Reach · Comparación de montajes")
+    fig.text(0.08, 0.02, "\n".join(deltas), fontsize=8, va="bottom")
+    fig.tight_layout(rect=(0, min(0.45, 0.04 + len(deltas) * 0.025), 1, 1))
     plt.show()
